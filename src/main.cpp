@@ -8,8 +8,10 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int) {
   setOverlayHandle(hOverlay);
   showOverlay(false);
 
-  if (!installKeyboardHook())
+  if (!installKeyboardHook()) {
     return -1;
+  }
+
   OutputDebugStringA(
       "[PROGRAM] Installed Keyboard hook. Programming running...\n");
   MSG msg;

@@ -23,9 +23,6 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
     bool isQKey =
         kb->vkCode == 'Q' && (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN);
 
-    // watch both left and right Ctrl
-    // accessing kb.vkCode
-
     if (!isOverlayVisible() && isCtrlHeldLongEnough()) {
       OutputDebugStringA("[KEY] Showing overlay...\n");
       showOverlay(true);
