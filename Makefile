@@ -2,25 +2,37 @@
 CXX := g++
 CXXFLAGS := -std=c++17 -Wall -Wextra -mwindows
 
-#target and source
-TARGET := macro_key_tool.exe
-SRC := main.cpp
+SRC_DIR := src
+BUILD_DIR := build
 
-#default target
-all: stop build
+SRCS := \
+    $(SRC_DIR)/main.cpp \
+    $(SRC_DIR)/hooks/hook.cpp \
+    $(SRC_DIR)/overlay/overlay.cpp \
+    $(SRC_DIR)/input/input.cpp
 
-#kills any prev instances of program
+OBJS := $(SRCS:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
+TARGET := $(BUILD_DIR)/macro_key_tool.exe
+
+
+all: stop $(TARGET)
+
+#link all object files into final binary
+$(TARGET): $(OBJS)
+	@powershell -Command "New-Item -ItemType Directory -Path '$(BUILD_DIR)' -Force" >nul 2>&1
+	$(CXX) $(CXXFLAGS) -o $@ $^
+
+#compile .cpp into .o
+$(BUILD_DIR)/%.o: $(SRC_DIR)/%.cpp
+	@powershell -Command "New-Item -ItemType Directory -Path '$(dir $@)' -Force" >nul 2>&1
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
 stop:
-	@powershell -Command "if (Get-Process -Name macro_key_tool -ErrorAction SilentlyContinue) { Stop-Process -Name macro_key_tool -Force; Write-Host 'Stopped macro_key_tool.exe' }"
+	@powershell -Command "if (Get-Process -Name macro_key_tool -ErrorAction SilentlyContinue) { Stop-Process -Name macro_key_tool -Force; Write-Host 'Stopped running instance.' }"
 
-#build executable
-build:
-	$(CXX) $(CXXFLAGS) -o $(TARGET) $(SRC)
-	@echo "Build complete: $(TARGET)"
-
-#run app detached from terminal
 run: all
 	@cmd /C start "" $(TARGET)
 
 clean:
-	del /Q $(TARGET)
+	@powershell -Command "if (Get-Process -Name macro_key_tool -ErrorAction SilentlyContinue) { Stop-Process -Name macro_key_tool -Force }"
+	@if exist build rmdir /S /Q build
