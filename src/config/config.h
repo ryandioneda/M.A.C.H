@@ -1,0 +1,11 @@
+#pragma once
+
+#include <string>
+#include <vector>
+
+struct MacroConfig {
+  std::string keys;
+  std::string action;
+};
+
+std::vector<MacroConfig> loadMacroConfig();

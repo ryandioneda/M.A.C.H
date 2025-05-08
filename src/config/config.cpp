@@ -1,13 +1,8 @@
 #include "config.h"
-
 #include <ShlObj.h>
-#include <fileapi.h>
+#include <debugapi.h>
 #include <fstream>
 #include <knownfolders.h>
-#include <minwindef.h>
-#include <shlobj_core.h>
-#include <sstream>
-#include <stringapiset.h>
 #include <windows.h>
 
 std::string retrieveAppDataPath() {
@@ -16,8 +11,8 @@ std::string retrieveAppDataPath() {
    */
   PWSTR widePath = nullptr;
 
-  HRESULT hr = (SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, NULL,
-                                     &widePath) != S_OK);
+  HRESULT hr =
+      SHGetKnownFolderPath(FOLDERID_RoamingAppData, 0, NULL, &widePath);
 
   if (FAILED(hr)) {
     OutputDebugStringA("[CONFIG] Failed to get AppData path.\n");
@@ -32,7 +27,6 @@ std::string retrieveAppDataPath() {
   return std::string(appDataPath);
 }
 
-// TODO:  build path function (%APPDATA%\MacroKeyTool\macros.json)
 std::string getAppDataMacroPath() {
   /**
    * Retrieves the path for config for macros.json
@@ -47,6 +41,35 @@ std::string getAppDataMacroPath() {
   // takes in path of directory to be created, and securityattributes, if NULL,
   // default
   CreateDirectoryA(dir.c_str(), NULL);
+
+  return dir + "\\macros.json";
 }
 
 // TODO:  reads JSON config from read file (loads config)
+std::vector<MacroConfig> loadMacroConfig() {
+  std::vector<MacroConfig> macros;
+  std::string path = getAppDataMacroPath();
+  if (path.empty()) {
+    OutputDebugStringA("[CONFIG] Path is empty.\n");
+    return macros;
+  }
+
+  std::ifstream file(path);
+  if (!file.is_open()) {
+    // create
+    std::ofstream create(path);
+
+    if (create.is_open()) {
+      create << "MACROS.JSON";
+      create.close();
+      OutputDebugStringA("[CONFIG] Created empty macros.json.\n");
+    } else {
+      OutputDebugStringA("[CONFIG] Failed to create macros.json.\n");
+      return macros;
+    }
+  }
+
+  OutputDebugStringA("[CONFIG] Called loadMacroConfig");
+
+  return macros;
+}
