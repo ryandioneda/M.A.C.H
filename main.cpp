@@ -4,13 +4,31 @@
 // holds the handle to installed keyboard hook
 HHOOK g_hHook = nullptr;
 HWND g_hWndOverlay = nullptr;
+bool g_isOverlayVisible = false;
+
+const int HOTKEY_EXIT = VK_ESCAPE;
+const DWORD CTRL_HOLD_THRESHOLD_MS = 1000; // 1 sec
+                                           //
+DWORD g_ctrlDownStart = 0;
 
 bool isCtrlHeld() {
-  return (GetAsyncKeyState(VK_LCONTROL) & 0x8000) ||
-         (GetAsyncKeyState(VK_RCONTROL) & 0x8000);
+  bool ctrlIsDown = (GetAsyncKeyState(VK_LCONTROL) & 0x8000) ||
+                    (GetAsyncKeyState(VK_RCONTROL) & 0x8000);
+
+  if (ctrlIsDown) {
+    if (g_ctrlDownStart == 0) {
+      g_ctrlDownStart = GetTickCount();
+    }
+    return (GetTickCount() - g_ctrlDownStart) >= CTRL_HOLD_THRESHOLD_MS;
+  } else {
+    g_ctrlDownStart = 0;
+    return false;
+  }
 }
 
-void updateOverlayVisibility() {
+bool isEscPressed() { return (GetAsyncKeyState(HOTKEY_EXIT) & 0x8000); }
+
+void showOverlayOnCurrentMonitor() {
   if (isCtrlHeld()) {
 
     POINT pt;
@@ -35,14 +53,20 @@ void updateOverlayVisibility() {
     }
     ShowWindow(g_hWndOverlay, SW_SHOW);
     UpdateWindow(g_hWndOverlay);
-  } else {
-    ShowWindow(g_hWndOverlay, SW_HIDE);
+    g_isOverlayVisible = true;
   }
+}
+
+void hideOverlay() {
+  ShowWindow(g_hWndOverlay, SW_HIDE);
+  g_isOverlayVisible = false;
 }
 
 // hook callback
 LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
   /**
+   * Used in keyboard hook to listen for key events
+   *
    * Params:
    * - nCode: Tells what kind of hook event it is
    * - wParam: The message type (ex. WM_KEYDOWN, WM_KEYUP...)
@@ -54,29 +78,22 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
     // recast virtual key (vk) code
     auto kb = reinterpret_cast<KBDLLHOOKSTRUCT *>(lParam);
 
-    bool isCtrlKey = kb->vkCode == VK_LCONTROL || kb->vkCode == VK_RCONTROL;
     bool isQKey =
         kb->vkCode == 'Q' && (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN);
 
     // watch both left and right Ctrl
     // accessing kb.vkCode
-    if (isCtrlKey) {
-      switch (wParam) {
-      case WM_KEYDOWN:
-      case WM_SYSKEYDOWN:
-        OutputDebugStringA("[HOOK] Ctrl DOWN\n");
-        updateOverlayVisibility();
-        break;
-      case WM_KEYUP:
-      case WM_SYSKEYUP:
-        OutputDebugStringA("[HOOK] Ctrl UP\n");
-        updateOverlayVisibility();
-        break;
-      }
+
+    if (!g_isOverlayVisible && isCtrlHeld()) {
+      OutputDebugStringA("[KEY] Showing overlay...\n");
+      showOverlayOnCurrentMonitor();
+    } else if (g_isOverlayVisible && isEscPressed()) {
+      OutputDebugStringA("[KEY] Hiding overlay...\n");
+      hideOverlay();
     }
 
     if (isCtrlHeld() && isQKey) {
-      OutputDebugStringA("[My Program] Ctrl + Q pressed. Exiting...\n");
+      OutputDebugStringA("[My Program] Ctrl + Q pressed. Ending program...\n");
       PostQuitMessage(0);
       return CallNextHookEx(g_hHook, nCode, wParam, lParam);
     }
