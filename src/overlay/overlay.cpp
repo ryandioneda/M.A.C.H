@@ -1,7 +1,13 @@
 #include "overlay/overlay.h"
+#include <wingdi.h>
 
 static HWND g_overlayWnd = nullptr;
 static bool g_visible = false;
+static std::vector<std::string> g_overlayLines;
+
+void setOverlayLines(const std::vector<std::string> &lines) {
+  g_overlayLines = lines;
+}
 
 LRESULT CALLBACK OverlayWndProc(HWND hWnd, UINT msg, WPARAM wParam,
                                 LPARAM lParam) {
@@ -10,7 +16,12 @@ LRESULT CALLBACK OverlayWndProc(HWND hWnd, UINT msg, WPARAM wParam,
     HDC hdc = BeginPaint(hWnd, &ps);
     SetBkMode(hdc, TRANSPARENT);
     SetTextColor(hdc, RGB(255, 255, 255));
-    TextOutA(hdc, 50, 50, "Ctrl Held", 9);
+
+    int y = 50;
+    for (const auto &line : g_overlayLines) {
+      TextOutA(hdc, 50, y, line.c_str(), line.length());
+      y += 24;
+    }
     EndPaint(hWnd, &ps);
     return 0;
   }
@@ -26,11 +37,10 @@ HWND CreateOverlayWindow(HINSTANCE hInst) {
   wc.hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
   RegisterClass(&wc);
 
-  HWND hWnd = CreateWindowEx(WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOPMOST,
-                             CLASS_NAME, nullptr, WS_POPUP, 100, 100, 1, 1,
-                             nullptr, nullptr, hInst, nullptr);
+  HWND hWnd = CreateWindowEx(WS_EX_TRANSPARENT, CLASS_NAME, nullptr, WS_POPUP,
+                             100, 100, 1, 1, nullptr, nullptr, hInst, nullptr);
 
-  SetLayeredWindowAttributes(hWnd, 0, 180, LWA_ALPHA);
+  // SetLayeredWindowAttributes(hWnd, 0, 180, LWA_ALPHA);
   return hWnd;
 }
 
