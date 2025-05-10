@@ -1,4 +1,4 @@
-#include "input.h"
+#include "input/input.h"
 #include <windows.h>
 
 static DWORD g_ctrlDownStart = 0;

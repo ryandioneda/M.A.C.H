@@ -1,5 +1,5 @@
-#include "config.h"
-#include "../json/json.hpp"
+#include "config/config.h"
+#include "json/json.hpp"
 #include <ShlObj.h>
 #include <debugapi.h>
 #include <fstream>

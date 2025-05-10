@@ -1,6 +1,6 @@
-#include "hook.h"
-#include "../input/input.h"
-#include "../overlay/overlay.h"
+#include "hooks/hook.h"
+#include "input/input.h"
+#include "overlay/overlay.h"
 #include <windows.h>
 
 static HHOOK g_hHook = nullptr;

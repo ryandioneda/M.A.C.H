@@ -1,10 +1,7 @@
-#include "overlay.h"
+#include "overlay/overlay.h"
 
 static HWND g_overlayWnd = nullptr;
 static bool g_visible = false;
-
-const int OVERLAY_WIDTH = 1920;
-const int OVERLAY_HEIGHT = 1080;
 
 LRESULT CALLBACK OverlayWndProc(HWND hWnd, UINT msg, WPARAM wParam,
                                 LPARAM lParam) {
@@ -29,10 +26,9 @@ HWND CreateOverlayWindow(HINSTANCE hInst) {
   wc.hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
   RegisterClass(&wc);
 
-  HWND hWnd =
-      CreateWindowEx(WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOPMOST,
-                     CLASS_NAME, nullptr, WS_POPUP, 100, 100, OVERLAY_WIDTH,
-                     OVERLAY_HEIGHT, nullptr, nullptr, hInst, nullptr);
+  HWND hWnd = CreateWindowEx(WS_EX_LAYERED | WS_EX_TRANSPARENT | WS_EX_TOPMOST,
+                             CLASS_NAME, nullptr, WS_POPUP, 100, 100, 1, 1,
+                             nullptr, nullptr, hInst, nullptr);
 
   SetLayeredWindowAttributes(hWnd, 0, 180, LWA_ALPHA);
   return hWnd;

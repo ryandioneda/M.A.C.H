@@ -1,6 +1,6 @@
 # compiler and flags
 CXX := g++
-CXXFLAGS := -std=c++17 -Wall -Wextra -mwindows
+CXXFLAGS := -std=c++17 -Wall -Wextra -mwindows -Iinclude
 LDFLAGS := -lole32 -lshell32 -luuid
 
 SRC_DIR := src
