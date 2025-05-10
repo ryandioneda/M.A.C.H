@@ -1,9 +1,13 @@
 #include "config.h"
+#include "../json/json.hpp"
 #include <ShlObj.h>
 #include <debugapi.h>
 #include <fstream>
 #include <knownfolders.h>
+#include <sstream>
 #include <windows.h>
+
+using json = nlohmann::json;
 
 std::string retrieveAppDataPath() {
   /**
@@ -56,20 +60,24 @@ std::vector<MacroConfig> loadMacroConfig() {
 
   std::ifstream file(path);
   if (!file.is_open()) {
-    // create
-    std::ofstream create(path);
-
-    if (create.is_open()) {
-      create << "MACROS.JSON";
-      create.close();
-      OutputDebugStringA("[CONFIG] Created empty macros.json.\n");
-    } else {
-      OutputDebugStringA("[CONFIG] Failed to create macros.json.\n");
-      return macros;
-    }
+    OutputDebugStringA("[CONFIG] Macros.json not found.\n");
+    return macros;
   }
 
-  OutputDebugStringA("[CONFIG] Called loadMacroConfig");
+  try {
+    json j;
+    file >> j;
 
+    for (const auto &entry : j) {
+      if (entry.contains("keys") && entry.contains("action")) {
+        macros.push_back({entry["keys"], entry["action"]});
+      }
+    }
+    OutputDebugStringA("[CONFIG] Successfully loaded from macros.json.\n");
+  } catch (const std::exception &e) {
+    std::ostringstream err;
+    err << "[CONFIG] JSON error: " << e.what() << "\n";
+    OutputDebugStringA(err.str().c_str());
+  }
   return macros;
 }

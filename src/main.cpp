@@ -6,6 +6,11 @@
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int) {
   std::vector<MacroConfig> macros = loadMacroConfig();
+
+  for (const auto &macro : macros) {
+    std::string obj = "[MACRO] " + macro.keys + " -> " + macro.action + "\n";
+    OutputDebugStringA(obj.c_str());
+  }
   HWND hOverlay = CreateOverlayWindow(hInst);
   setOverlayHandle(hOverlay);
   showOverlay(false);

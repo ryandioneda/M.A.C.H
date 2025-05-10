@@ -53,14 +53,16 @@ void showOverlay(bool show) {
       MONITORINFO monitorInfo = {};
       monitorInfo.cbSize = sizeof(monitorInfo);
       if (GetMonitorInfo(hMonitor, &monitorInfo)) {
-        int width = OVERLAY_WIDTH;
-        int height = OVERLAY_HEIGHT;
-        int x =
-            monitorInfo.rcWork.left +
-            (monitorInfo.rcWork.right - monitorInfo.rcWork.left - width) / 2;
-        int y =
-            monitorInfo.rcWork.top +
-            (monitorInfo.rcWork.bottom - monitorInfo.rcWork.top - height) / 2;
+        int monitorWidth =
+            monitorInfo.rcMonitor.right - monitorInfo.rcMonitor.left;
+        int monitorHeight =
+            monitorInfo.rcMonitor.bottom - monitorInfo.rcMonitor.top;
+
+        int width = monitorWidth * 0.8;
+        int height = monitorHeight * 0.8;
+
+        int x = monitorInfo.rcMonitor.left + (monitorWidth - width) / 2;
+        int y = monitorInfo.rcMonitor.top + (monitorHeight - height) / 2;
 
         SetWindowPos(g_overlayWnd, HWND_TOPMOST, x, y, width, height,
                      SWP_NOACTIVATE | SWP_SHOWWINDOW);
