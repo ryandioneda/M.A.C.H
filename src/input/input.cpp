@@ -1,5 +1,6 @@
 #include "input/input.h"
 #include <windows.h>
+#include <winuser.h>
 
 static DWORD g_ctrlDownStart = 0;
 const DWORD CTRL_HOLD_THRESHOLD = 1000;
@@ -21,3 +22,8 @@ bool isCtrlHeldLongEnough() {
 }
 
 bool isEscapePressed() { return (GetAsyncKeyState(VK_ESCAPE) & 0x8000); }
+
+bool isSearchTrigger(WPARAM wParam, KBDLLHOOKSTRUCT *kb) {
+  return (kb->vkCode == VK_OEM_2) && (GetAsyncKeyState(VK_SHIFT) & 0x8000) &&
+         (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN);
+}

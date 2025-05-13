@@ -1,9 +1,14 @@
 #include "hooks/hook.h"
 #include "input/input.h"
 #include "overlay/overlay.h"
+#include <debugapi.h>
 #include <windows.h>
 
 static HHOOK g_hHook = nullptr;
+
+// search mode state vars for hook
+static bool g_inSearchMode = false;
+static std::string g_searchQuery;
 
 LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
   /**
@@ -35,6 +40,12 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
       OutputDebugStringA("[My Program] Ctrl + Q pressed. Ending program...\n");
       PostQuitMessage(0);
       return CallNextHookEx(g_hHook, nCode, wParam, lParam);
+    }
+
+    if (isOverlayVisible() && isSearchTrigger(wParam, kb)) {
+      g_inSearchMode = true;
+      g_searchQuery.clear();
+      OutputDebugStringA("[SEARCH] Entering search mode\n");
     }
   }
 
