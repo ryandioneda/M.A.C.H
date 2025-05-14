@@ -5,10 +5,10 @@
 #include <windows.h>
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int) {
-  std::vector<MacroConfig> macros = loadMacroConfig();
+  g_allMacros = loadMacroConfig();
   std::vector<std::string> displayLines;
 
-  for (const auto &macro : macros) {
+  for (const auto &macro : g_allMacros) {
     std::string obj = "[MACRO] " + macro.keys + " -> " + macro.action + "\n";
     displayLines.push_back(macro.keys + " -> " + macro.action);
     OutputDebugStringA(obj.c_str());

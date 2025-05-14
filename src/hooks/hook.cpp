@@ -3,12 +3,13 @@
 #include "overlay/overlay.h"
 #include <debugapi.h>
 #include <windows.h>
+#include <winuser.h>
 
 static HHOOK g_hHook = nullptr;
 
 // search mode state vars for hook
-static bool g_inSearchMode = false;
-static std::string g_searchQuery;
+bool g_inSearchMode = false;
+std::string g_searchQuery = "";
 
 LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
   /**
@@ -46,7 +47,16 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
       g_inSearchMode = true;
       g_searchQuery.clear();
       OutputDebugStringA("[SEARCH] Entering search mode\n");
+    } else if (kb->vkCode == VK_BACK && !g_searchQuery.empty()) {
+      g_searchQuery.pop_back();
+    } else if ((wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) &&
+               kb->vkCode >= 'A' && kb->vkCode <= 'Z') {
+      bool isShift = GetAsyncKeyState(VK_SHIFT) & 0x8000;
+      char c = isShift ? static_cast<char>(kb->vkCode)
+                       : std::tolower(static_cast<char>(kb->vkCode));
+      g_searchQuery.push_back(c);
     }
+    applySearchFilter(); // update overlay lines
   }
 
   // pass hook to next chain

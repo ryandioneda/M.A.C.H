@@ -1,9 +1,26 @@
 #include "overlay/overlay.h"
+#include "config/config.h"
+#include "hooks/hook.h"
 #include <wingdi.h>
+#include <winuser.h>
 
 static HWND g_overlayWnd = nullptr;
 static bool g_visible = false;
-static std::vector<std::string> g_overlayLines;
+static std::vector<std::string> g_overlayLines; // for display
+std::vector<MacroConfig> g_allMacros;
+
+void applySearchFilter() {
+  std::vector<std::string> matches;
+  for (const auto &m : g_allMacros) {
+    if (g_searchQuery.empty() ||
+        m.keys.find(g_searchQuery) != std::string::npos ||
+        m.action.find(g_searchQuery) != std::string::npos) {
+      matches.push_back(m.keys + " -> " + m.action);
+    }
+  }
+  setOverlayLines(matches);
+  InvalidateRect(g_overlayWnd, NULL, TRUE);
+}
 
 void setOverlayLines(const std::vector<std::string> &lines) {
   g_overlayLines = lines;
@@ -16,6 +33,11 @@ LRESULT CALLBACK OverlayWndProc(HWND hWnd, UINT msg, WPARAM wParam,
     HDC hdc = BeginPaint(hWnd, &ps);
     SetBkMode(hdc, TRANSPARENT);
     SetTextColor(hdc, RGB(255, 255, 255));
+
+    if (g_inSearchMode) {
+      std::string searchHeader = "Search: " + g_searchQuery;
+      TextOutA(hdc, 50, 20, searchHeader.c_str(), searchHeader.length());
+    }
 
     int y = 50;
     for (const auto &line : g_overlayLines) {
