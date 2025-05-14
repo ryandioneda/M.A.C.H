@@ -59,7 +59,7 @@ HWND CreateOverlayWindow(HINSTANCE hInst) {
   wc.hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
   RegisterClass(&wc);
 
-  HWND hWnd = CreateWindowEx(WS_EX_TRANSPARENT, CLASS_NAME, nullptr, WS_POPUP,
+  HWND hWnd = CreateWindowEx(WS_EX_TOOLWINDOW, CLASS_NAME, nullptr, WS_POPUP,
                              100, 100, 1, 1, nullptr, nullptr, hInst, nullptr);
 
   // SetLayeredWindowAttributes(hWnd, 0, 180, LWA_ALPHA);
@@ -73,6 +73,8 @@ void showOverlay(bool show) {
     return;
 
   if (show) {
+    SetForegroundWindow(g_overlayWnd);
+    SetFocus(g_overlayWnd);
 
     POINT pt;
     if (GetCursorPos(&pt)) {
@@ -93,7 +95,7 @@ void showOverlay(bool show) {
         int y = monitorInfo.rcMonitor.top + (monitorHeight - height) / 2;
 
         SetWindowPos(g_overlayWnd, HWND_TOPMOST, x, y, width, height,
-                     SWP_NOACTIVATE | SWP_SHOWWINDOW);
+                     SWP_SHOWWINDOW);
       }
     }
     ShowWindow(g_overlayWnd, SW_SHOW);

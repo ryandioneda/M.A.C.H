@@ -9,7 +9,7 @@ static HHOOK g_hHook = nullptr;
 
 // search mode state vars for hook
 bool g_inSearchMode = false;
-std::string g_searchQuery = "";
+std::string g_searchQuery;
 
 LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
   /**
@@ -20,46 +20,66 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
    * - wParam: The message type (ex. WM_KEYDOWN, WM_KEYUP...)
    * - lParam: A pointer to a KBDLLHOOKSTRUCT (contains info about key event)
    */
+  if (nCode != HC_ACTION)
+    return CallNextHookEx(g_hHook, nCode, wParam, lParam);
 
-  // if real keyboard action
-  if (nCode == HC_ACTION) {
-    // recast virtual key (vk) code
-    auto kb = reinterpret_cast<KBDLLHOOKSTRUCT *>(lParam);
+  auto kb = (KBDLLHOOKSTRUCT *)lParam;
 
-    bool isQKey =
-        kb->vkCode == 'Q' && (wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN);
+  if (!isOverlayVisible() && isCtrlHeldLongEnough()) {
+    OutputDebugStringA("[OVERLAY] Showing overlay...\n");
+    showOverlay(true);
+    return 1;
+  }
 
-    if (!isOverlayVisible() && isCtrlHeldLongEnough()) {
-      OutputDebugStringA("[KEY] Showing overlay...\n");
-      showOverlay(true);
-    } else if (isOverlayVisible() && isEscapePressed()) {
-      OutputDebugStringA("[KEY] Hiding overlay...\n");
+  if (wParam == WM_KEYDOWN && (GetAsyncKeyState(VK_CONTROL) & 0x8000) &&
+      kb->vkCode == 'Q') {
+    OutputDebugStringA("[OVERLAY] Quitting Macro Program...\n");
+    PostQuitMessage(0);
+    return 1;
+  }
+
+  if (isOverlayVisible()) {
+
+    if ((wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) &&
+        kb->vkCode == VK_ESCAPE) {
+      OutputDebugStringA("[OVERLAY] Hiding overlay...\n");
+      g_inSearchMode = false;
+      g_searchQuery.clear();
       showOverlay(false);
-    }
-
-    if (isCtrlHeld() && isQKey) {
-      OutputDebugStringA("[My Program] Ctrl + Q pressed. Ending program...\n");
-      PostQuitMessage(0);
       return CallNextHookEx(g_hHook, nCode, wParam, lParam);
     }
 
-    if (isOverlayVisible() && isSearchTrigger(wParam, kb)) {
+    if (wParam == WM_KEYDOWN && kb->vkCode == VK_OEM_2 &&
+        (GetAsyncKeyState(VK_SHIFT) & 0x8000)) {
+      OutputDebugStringA("[OVERLAY] Triggering search mode...\n");
       g_inSearchMode = true;
       g_searchQuery.clear();
-      OutputDebugStringA("[SEARCH] Entering search mode\n");
-    } else if (kb->vkCode == VK_BACK && !g_searchQuery.empty()) {
-      g_searchQuery.pop_back();
-    } else if ((wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) &&
-               kb->vkCode >= 'A' && kb->vkCode <= 'Z') {
-      bool isShift = GetAsyncKeyState(VK_SHIFT) & 0x8000;
-      char c = isShift ? static_cast<char>(kb->vkCode)
-                       : std::tolower(static_cast<char>(kb->vkCode));
-      g_searchQuery.push_back(c);
+      applySearchFilter();
+      return 1;
     }
-    applySearchFilter(); // update overlay lines
-  }
 
-  // pass hook to next chain
+    if (g_inSearchMode && wParam == WM_KEYDOWN) {
+      if (kb->vkCode == VK_BACK && !g_searchQuery.empty()) {
+        OutputDebugStringA("[OVERLAY] Popping char...\n");
+        g_searchQuery.pop_back();
+        applySearchFilter();
+        return 1;
+      }
+      if ((kb->vkCode >= 'A' && kb->vkCode <= 'Z') ||
+          (kb->vkCode >= '0' && kb->vkCode <= '9') || kb->vkCode == VK_SPACE) {
+        bool shift = GetAsyncKeyState(VK_SHIFT) & 0x8000;
+        char c = shift ? char(kb->vkCode) : char(std::tolower(kb->vkCode));
+        g_searchQuery.push_back(c);
+        applySearchFilter();
+        return 1;
+      }
+      // all other keys fall through to next hook
+      return CallNextHookEx(g_hHook, nCode, wParam, lParam);
+    }
+    // not in search mode - pass along
+    return CallNextHookEx(g_hHook, nCode, wParam, lParam);
+  }
+  // overlay is not shown, pass along
   return CallNextHookEx(g_hHook, nCode, wParam, lParam);
 }
 

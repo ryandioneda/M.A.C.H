@@ -4,7 +4,6 @@
 #include <vector>
 #include <windows.h>
 
-extern std::string g_searchQuery;
 extern std::vector<MacroConfig> g_allMacros;
 void setOverlayLines(const std::vector<std::string> &lines);
 HWND CreateOverlayWindow(HINSTANCE hInst);
