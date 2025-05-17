@@ -1,11 +1,14 @@
 #include "overlay/overlay.h"
 #include "config/config.h"
 #include "hooks/hook.h"
+#include <minwindef.h>
 #include <wingdi.h>
 #include <winuser.h>
 
 static HWND g_overlayWnd = nullptr;
 static bool g_visible = false;
+static HBRUSH g_bgBrush = nullptr;
+static constexpr const char *OVERLAY_CLASS_NAME = "OverlayWindowClass";
 static std::vector<std::string> g_overlayLines; // for display
 std::vector<MacroConfig> g_allMacros;
 
@@ -50,19 +53,27 @@ LRESULT CALLBACK OverlayWndProc(HWND hWnd, UINT msg, WPARAM wParam,
   return DefWindowProc(hWnd, msg, wParam, lParam);
 }
 
-HWND CreateOverlayWindow(HINSTANCE hInst) {
-  const char CLASS_NAME[] = "OverlayWindowClass";
+WNDCLASS createOverlayWindowClass(HINSTANCE hInst) {
   WNDCLASS wc = {};
   wc.lpfnWndProc = OverlayWndProc;
   wc.hInstance = hInst;
-  wc.lpszClassName = CLASS_NAME;
-  wc.hbrBackground = CreateSolidBrush(RGB(0, 0, 0));
-  RegisterClass(&wc);
+  wc.lpszClassName = OVERLAY_CLASS_NAME;
+  wc.hbrBackground = g_bgBrush;
+  return wc;
+}
 
-  HWND hWnd = CreateWindowEx(WS_EX_TOOLWINDOW, CLASS_NAME, nullptr, WS_POPUP,
-                             100, 100, 1, 1, nullptr, nullptr, hInst, nullptr);
+HWND CreateOverlayWindow(HINSTANCE hInst) {
+  if (!g_bgBrush) {
+    g_bgBrush = CreateSolidBrush(RGB(0, 0, 0));
+  }
 
-  // SetLayeredWindowAttributes(hWnd, 0, 180, LWA_ALPHA);
+  WNDCLASS wc = createOverlayWindowClass(hInst);
+  RegisterClassA(&wc);
+
+  HWND hWnd =
+      CreateWindowEx(WS_EX_TOOLWINDOW, OVERLAY_CLASS_NAME, nullptr, WS_POPUP,
+                     100, 100, 1, 1, nullptr, nullptr, hInst, nullptr);
+
   return hWnd;
 }
 
@@ -104,6 +115,15 @@ void showOverlay(bool show) {
   } else {
     ShowWindow(g_overlayWnd, SW_HIDE);
     g_visible = false;
+  }
+}
+
+// FIX: DELETE brush after use with DeleteObject function
+void DestoryOverlayWindow(HINSTANCE hInst) {
+  if (g_overlayWnd) {
+    // handle for window to be destroyed
+    DestroyWindow(g_overlayWnd);
+    g_overlayWnd = nullptr;
   }
 }
 
