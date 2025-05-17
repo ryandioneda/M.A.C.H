@@ -14,7 +14,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int) {
     OutputDebugStringA(obj.c_str());
   }
   setOverlayLines(displayLines);
-  HWND hOverlay = CreateOverlayWindow(hInst);
+  HWND hOverlay = createOverlayWindow(hInst);
   setOverlayHandle(hOverlay);
   showOverlay(false);
 
@@ -31,5 +31,10 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int) {
   }
 
   uninstallKeyboardHook();
+
+  // TODO: destroy window handle (hOverlay)
+
+  // TODO: unregister overlay window class
+
   return 0;
 }
