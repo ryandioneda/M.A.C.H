@@ -1,15 +1,12 @@
 #include "hooks/hook.h"
 #include "input/input.h"
 #include "overlay/overlay.h"
+#include "overlay/overlayState.h"
 #include <debugapi.h>
 #include <windows.h>
 #include <winuser.h>
 
 static HHOOK g_hHook = nullptr;
-
-// search mode state vars for hook
-bool g_inSearchMode = false;
-std::string g_searchQuery;
 
 LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
   /**

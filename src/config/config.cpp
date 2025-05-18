@@ -1,4 +1,5 @@
 #include "config/config.h"
+#include "overlay/overlayState.h"
 #include "json/json.hpp"
 #include <ShlObj.h>
 #include <debugapi.h>
@@ -49,8 +50,7 @@ std::string getAppDataMacroPath() {
   return dir + "\\macros.json";
 }
 
-// TODO:  reads JSON config from read file (loads config)
-std::vector<MacroConfig> loadMacroConfig() {
+std::vector<MacroConfig> getMacroConfig() {
   std::vector<MacroConfig> macros;
   std::string path = getAppDataMacroPath();
   if (path.empty()) {

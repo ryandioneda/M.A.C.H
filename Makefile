@@ -9,7 +9,11 @@ BUILD_DIR := build
 SRCS := \
     $(SRC_DIR)/main.cpp \
     $(SRC_DIR)/hooks/hook.cpp \
-    $(SRC_DIR)/overlay/overlay.cpp \
+    $(SRC_DIR)/overlay/overlayClass.cpp \
+    $(SRC_DIR)/overlay/overlayControl.cpp \
+    $(SRC_DIR)/overlay/overlayRender.cpp \
+    $(SRC_DIR)/overlay/overlayState.cpp \
+    $(SRC_DIR)/overlay/overlayWindow.cpp \
     $(SRC_DIR)/input/input.cpp \
     $(SRC_DIR)/config/config.cpp
 

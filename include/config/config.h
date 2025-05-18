@@ -8,4 +8,4 @@ struct MacroConfig {
   std::string action;
 };
 
-std::vector<MacroConfig> loadMacroConfig();
+std::vector<MacroConfig> getMacroConfig();

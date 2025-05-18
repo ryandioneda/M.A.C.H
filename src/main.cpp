@@ -5,17 +5,17 @@
 #include <windows.h>
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int) {
-  g_allMacros = loadMacroConfig();
+  auto macros = getMacroConfig();
   std::vector<std::string> displayLines;
 
-  for (const auto &macro : g_allMacros) {
+  for (const auto &macro : macros) {
     std::string obj = "[MACRO] " + macro.keys + " -> " + macro.action + "\n";
     displayLines.push_back(macro.keys + " -> " + macro.action);
     OutputDebugStringA(obj.c_str());
   }
   setOverlayLines(displayLines);
   HWND hOverlay = createOverlayWindow(hInst);
-  setOverlayHandle(hOverlay);
+  setOverlayHandle(hOverlay); // g_overlayWnd = hOverlay
   showOverlay(false);
 
   if (!installKeyboardHook()) {
@@ -33,8 +33,10 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int) {
   uninstallKeyboardHook();
 
   // TODO: destroy window handle (hOverlay)
+  destroyOverlayWindow();
 
   // TODO: unregister overlay window class
+  destroyOverlay(hInst);
 
   return 0;
 }
