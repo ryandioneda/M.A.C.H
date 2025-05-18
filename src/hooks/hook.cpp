@@ -25,6 +25,9 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
   if (!isOverlayVisible() && isCtrlHeldLongEnough()) {
     OutputDebugStringA("[OVERLAY] Showing overlay...\n");
     showOverlay(true);
+    g_inSearchMode = true;
+    g_searchQuery.clear();
+    applySearchFilter();
     return 1;
   }
 
@@ -46,14 +49,14 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
       return CallNextHookEx(g_hHook, nCode, wParam, lParam);
     }
 
-    if (wParam == WM_KEYDOWN && kb->vkCode == VK_OEM_2 &&
-        (GetAsyncKeyState(VK_SHIFT) & 0x8000)) {
-      OutputDebugStringA("[OVERLAY] Triggering search mode...\n");
-      g_inSearchMode = true;
-      g_searchQuery.clear();
-      applySearchFilter();
-      return 1;
-    }
+    // if (wParam == WM_KEYDOWN && kb->vkCode == VK_OEM_2 &&
+    //     (GetAsyncKeyState(VK_SHIFT) & 0x8000)) {
+    //   OutputDebugStringA("[OVERLAY] Triggering search mode...\n");
+    //   g_inSearchMode = true;
+    //   g_searchQuery.clear();
+    //   applySearchFilter();
+    //   return 1;
+    // }
 
     if (g_inSearchMode && wParam == WM_KEYDOWN) {
       if (kb->vkCode == VK_BACK && !g_searchQuery.empty()) {
