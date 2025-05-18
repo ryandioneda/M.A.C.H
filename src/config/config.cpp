@@ -41,7 +41,7 @@ std::string getAppDataMacroPath() {
   if (base.empty())
     return "";
 
-  std::string dir = base + "\\MacroKeyTool";
+  std::string dir = base + "\\mach";
 
   // takes in path of directory to be created, and securityattributes, if NULL,
   // default
