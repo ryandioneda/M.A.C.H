@@ -52,6 +52,7 @@ void applySearchFilter() {
   }
   setOverlayLines(matches);
   InvalidateRect(g_overlayWnd, NULL, TRUE);
+  // UpdateWindow(g_overlayWnd);
 }
 
 bool isOverlayVisible() { return g_visible; }

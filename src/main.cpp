@@ -6,6 +6,7 @@
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int) {
   auto macros = getMacroConfig();
+  setMacros(macros);
   std::vector<std::string> displayLines;
 
   for (const auto &macro : macros) {

@@ -9,3 +9,4 @@ struct MacroConfig {
 };
 
 std::vector<MacroConfig> getMacroConfig();
+void setMacros(const std::vector<MacroConfig> &macros);

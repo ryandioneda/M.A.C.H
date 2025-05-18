@@ -81,3 +81,5 @@ std::vector<MacroConfig> getMacroConfig() {
   }
   return macros;
 }
+
+void setMacros(const std::vector<MacroConfig> &macros) { g_allMacros = macros; }
