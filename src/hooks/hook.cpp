@@ -31,8 +31,7 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
     return 1;
   }
 
-  if (wParam == WM_KEYDOWN && (GetAsyncKeyState(VK_CONTROL) & 0x8000) &&
-      kb->vkCode == 'Q') {
+  if (isCtrlHeld() && kb->vkCode == 'Q') {
     OutputDebugStringA("[OVERLAY] Quitting Macro Program...\n");
     PostQuitMessage(0);
     return 1;
@@ -40,8 +39,7 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
 
   if (isOverlayVisible()) {
 
-    if ((wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) &&
-        kb->vkCode == VK_ESCAPE) {
+    if (isEscapePressed(wParam, kb)) {
       OutputDebugStringA("[OVERLAY] Hiding overlay...\n");
       g_inSearchMode = false;
       g_searchQuery.clear();
