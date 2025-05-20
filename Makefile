@@ -15,7 +15,10 @@ SRCS := \
     $(SRC_DIR)/overlay/overlayState.cpp \
     $(SRC_DIR)/overlay/overlayWindow.cpp \
     $(SRC_DIR)/input/input.cpp \
-    $(SRC_DIR)/config/config.cpp
+    $(SRC_DIR)/config/configManager.cpp \
+    $(SRC_DIR)/config/configPaths.cpp \
+    $(SRC_DIR)/config/fileOps.cpp \
+
 
 OBJS := $(SRCS:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
 TARGET := $(BUILD_DIR)/macro_key_tool.exe

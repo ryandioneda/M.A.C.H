@@ -1,12 +1,11 @@
-#include "config/config.h"
+#include "config/configManager.h"
 #include "hooks/hook.h"
 #include "overlay/overlay.h"
 #include <debugapi.h>
 #include <windows.h>
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int) {
-  OutputDebugStringA("->ENTER WINMAIN\n");
-  auto macros = getMacroConfig();
+  auto macros = getMacros();
   setMacros(macros);
   std::vector<std::string> displayLines;
 
