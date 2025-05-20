@@ -5,6 +5,7 @@
 #include <windows.h>
 
 int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int) {
+  OutputDebugStringA("->ENTER WINMAIN\n");
   auto macros = getMacroConfig();
   setMacros(macros);
   std::vector<std::string> displayLines;
@@ -20,6 +21,7 @@ int WINAPI WinMain(HINSTANCE hInst, HINSTANCE, LPSTR, int) {
   showOverlay(false);
 
   if (!installKeyboardHook()) {
+    OutputDebugStringA("[PROGRAM] Hook installation failed...\n");
     return -1;
   }
 
