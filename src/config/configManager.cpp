@@ -19,6 +19,8 @@ std::vector<MacroConfig> getMacros() {
   }
 
   std::ifstream infile(path);
+
+  // if the file does not exist
   if (!infile.is_open()) {
     OutputDebugStringA("[MANAGER] Macros.json not found; creating default.\n");
     HANDLE hFile = openConfigFile(path.c_str());
@@ -28,8 +30,10 @@ std::vector<MacroConfig> getMacros() {
       // write to config
       writeTextToFile(hFile, defaultConfig.dump(4));
     }
-    return macros;
+    // return macros;
   }
+
+  // if the file exists, read
   try {
     json j;
     infile >> j;
