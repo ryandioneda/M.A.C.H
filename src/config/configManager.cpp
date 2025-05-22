@@ -5,7 +5,6 @@
 #include <debugapi.h>
 #include <fstream>
 #include <json/json.hpp>
-#include <sstream>
 #include <windows.h>
 
 using json = nlohmann::json;
@@ -28,26 +27,17 @@ std::vector<MacroConfig> getMacros() {
       json defaultConfig =
           json::array({{{"keys", "Ctr+Shift+H"}, {"action", "Show Help"}}});
       // write to config
-      writeTextToFile(hFile, defaultConfig.dump(4));
+      bool ok = writeTextToFile(hFile, defaultConfig.dump(4));
+      if (!ok) {
+        OutputDebugStringA("[MANAGER] Failed to write default config.\n");
+        return macros;
+      }
     }
     // return macros;
   }
 
-  // if the file exists, read
-  try {
-    json j;
-    infile >> j;
-    for (const auto &entry : j) {
-      if (entry.contains("keys") && entry.contains("action")) {
-        macros.push_back({entry["keys"], entry["action"]});
-      }
-    }
-    OutputDebugStringA("[MANAGER] Loaded macros.json successfully\n");
-  } catch (const std::exception &e) {
-    std::ostringstream err;
-    err << "[MANAGER] JSON parse error: " << e.what() << "\n";
-    OutputDebugStringA(err.str().c_str());
-  }
+  // if the file exists, read and insert (opens new stream)
+  readConfigMacros(path, macros);
   return macros;
 }
 

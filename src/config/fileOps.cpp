@@ -1,4 +1,9 @@
 #include "config/fileOps.h"
+#include "config/macroConfig.h"
+#include <debugapi.h>
+#include <fstream>
+#include <json/json.hpp>
+#include <sstream>
 #include <windows.h>
 
 HANDLE openConfigFile(const std::string &path) {
@@ -29,4 +34,29 @@ bool writeTextToFile(HANDLE hFile, const std::string &text) {
 
   CloseHandle(hFile);
   return true;
+}
+
+using json = nlohmann::json;
+
+void readConfigMacros(std::string &path, std::vector<MacroConfig> &macros) {
+  std::ifstream in(path); // open new stream
+  if (!in.is_open()) {
+    OutputDebugStringA("[MANAGER] Cannot open macros.json for reading.\n");
+    return;
+  }
+
+  try {
+    json j;
+    in >> j;
+    for (const auto &entry : j) {
+      if (entry.contains("keys") && entry.contains("action")) {
+        macros.push_back({entry["keys"], entry["action"]});
+      }
+    }
+    OutputDebugStringA("[MANAGER] Loaded macros.json successfully.\n");
+  } catch (const std::exception &e) {
+    std::ostringstream err;
+    err << "[MANAGER] JSON parse error: " << e.what() << '\n';
+    OutputDebugStringA(err.str().c_str());
+  }
 }
