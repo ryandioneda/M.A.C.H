@@ -21,7 +21,7 @@ SRCS := \
 
 
 OBJS := $(SRCS:$(SRC_DIR)/%.cpp=$(BUILD_DIR)/%.o)
-TARGET := $(BUILD_DIR)/macro_key_tool.exe
+TARGET := $(BUILD_DIR)/mach.exe
 
 all: stop $(TARGET)
 
