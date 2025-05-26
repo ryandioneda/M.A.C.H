@@ -22,7 +22,7 @@ LRESULT CALLBACK LowLevelKeyboardProc(int nCode, WPARAM wParam, LPARAM lParam) {
 
   auto kb = (KBDLLHOOKSTRUCT *)lParam;
 
-  if (!isOverlayVisible() && isCtrlHeldLongEnough()) {
+  if (!isOverlayVisible() && isOverlayTriggered(wParam, kb)) {
     OutputDebugStringA("[OVERLAY] Showing overlay...\n");
     showOverlay(true);
     g_inSearchMode = true;

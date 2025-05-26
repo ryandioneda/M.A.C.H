@@ -25,3 +25,16 @@ bool isEscapePressed(WPARAM wParam, KBDLLHOOKSTRUCT *kb) {
   return ((wParam == WM_KEYDOWN || wParam == WM_SYSKEYDOWN) &&
           kb->vkCode == VK_ESCAPE);
 }
+
+bool isOverlayTriggered(WPARAM wParam, KBDLLHOOKSTRUCT *kb) {
+  if (wParam != WM_KEYDOWN && wParam != WM_SYSKEYDOWN)
+    return false;
+
+  if (kb->vkCode != VK_OEM_2)
+    return false;
+
+  if ((GetAsyncKeyState(VK_MENU) & 0x8000) == 0)
+    return false;
+
+  return true;
+}
